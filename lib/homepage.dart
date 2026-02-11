@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
@@ -12,75 +13,191 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
-  // ============================================
-  // IMPORTANT: Replace with your actual Xendit Secret Key
-  // ============================================
+// ============================================
+// IMPORTANT: Replace with your actual Xendit Secret Key
+// ============================================
   final String _xenditSecretKey = "xnd_development_z8cNO5PbZB5MRi7yfFxamY53fHyPp1152XyJsQ96OgwzoArEItoogXXeFKHXJGd";
 
-  // App State
+// App State
   double _walletBalance = 1000.00;
   bool _isLoading = false;
   bool _showWebView = false;
   List<Map<String, dynamic>> _transactions = [];
   String? _currentInvoiceId;
   String? _paymentUrl;
-  WebViewController? _webViewController;
   late StreamController<Map<String, dynamic>> _paymentSuccessController;
 
-  // Mobile load purchase variables
+// Mobile load purchase variables
   String _mobileNumber = '';
   String _selectedNetwork = '';
   double _selectedAmount = 0.0;
 
-  // Bottom Navigation
+// Bottom Navigation
   int _selectedIndex = 0;
 
-  // Settings states
+// Settings states
   bool _notificationsEnabled = true;
   bool _darkModeEnabled = false;
   bool _biometricEnabled = false;
   String _userPIN = "123456";
 
-  // Mobile network providers
+// Mobile network providers
   final List<Map<String, dynamic>> _mobileNetworks = [
     {
       'name': 'Smart',
       'logo': 'S',
       'color': CupertinoColors.systemRed,
       'icon': CupertinoIcons.bolt_fill,
-      'prefixes': ['0819', '0908', '0918', '0919', '0920', '0921', '0930', '0931', '0940', '0946', '0947', '0948', '0949', '0951', '0970', '0980', '0981', '0989', '0990', '0991', '0998', '0999'],
+      'prefixes': [
+        '0819',
+        '0908',
+        '0918',
+        '0919',
+        '0920',
+        '0921',
+        '0930',
+        '0931',
+        '0940',
+        '0946',
+        '0947',
+        '0948',
+        '0949',
+        '0951',
+        '0970',
+        '0980',
+        '0981',
+        '0989',
+        '0990',
+        '0991',
+        '0998',
+        '0999'
+      ],
     },
     {
       'name': 'TNT',
       'logo': 'T',
       'color': CupertinoColors.systemOrange,
       'icon': CupertinoIcons.flame_fill,
-      'prefixes': ['0905', '0906', '0915', '0916', '0917', '0925', '0926', '0927', '0935', '0936', '0937', '0945', '0950', '0955', '0956', '0960', '0961', '0965', '0966', '0967', '0975', '0976', '0977', '0978', '0979'],
+      'prefixes': [
+        '0905',
+        '0906',
+        '0915',
+        '0916',
+        '0917',
+        '0925',
+        '0926',
+        '0927',
+        '0935',
+        '0936',
+        '0937',
+        '0945',
+        '0950',
+        '0955',
+        '0956',
+        '0960',
+        '0961',
+        '0965',
+        '0966',
+        '0967',
+        '0975',
+        '0976',
+        '0977',
+        '0978',
+        '0979'
+      ],
     },
     {
       'name': 'Globe',
       'logo': 'G',
       'color': CupertinoColors.systemGreen,
       'icon': CupertinoIcons.globe,
-      'prefixes': ['0817', '0905', '0906', '0915', '0916', '0917', '0926', '0927', '0935', '0936', '0937', '0945', '0953', '0954', '0955', '0956', '0965', '0966', '0967', '0975', '0976', '0977', '0978', '0979', '0995', '0996', '0997'],
+      'prefixes': [
+        '0817',
+        '0905',
+        '0906',
+        '0915',
+        '0916',
+        '0917',
+        '0926',
+        '0927',
+        '0935',
+        '0936',
+        '0937',
+        '0945',
+        '0953',
+        '0954',
+        '0955',
+        '0956',
+        '0965',
+        '0966',
+        '0967',
+        '0975',
+        '0976',
+        '0977',
+        '0978',
+        '0979',
+        '0995',
+        '0996',
+        '0997'
+      ],
     },
     {
       'name': 'TM',
       'logo': 'TM',
       'color': CupertinoColors.systemBlue,
       'icon': CupertinoIcons.antenna_radiowaves_left_right,
-      'prefixes': ['0895', '0896', '0897', '0898', '0904', '0905', '0906', '0915', '0916', '0926', '0927', '0935', '0936', '0937', '0945', '0953', '0954', '0956', '0965', '0966', '0967', '0975', '0976', '0977', '0978', '0979'],
+      'prefixes': [
+        '0895',
+        '0896',
+        '0897',
+        '0898',
+        '0904',
+        '0905',
+        '0906',
+        '0915',
+        '0916',
+        '0926',
+        '0927',
+        '0935',
+        '0936',
+        '0937',
+        '0945',
+        '0953',
+        '0954',
+        '0956',
+        '0965',
+        '0966',
+        '0967',
+        '0975',
+        '0976',
+        '0977',
+        '0978',
+        '0979'
+      ],
     },
     {
       'name': 'DITO',
       'logo': 'D',
       'color': CupertinoColors.systemPurple,
       'icon': CupertinoIcons.rocket_fill,
-      'prefixes': ['0891', '0892', '0893', '0894', '0895', '0896', '0897', '0898', '0991', '0992', '0993', '0994'],
+      'prefixes': [
+        '0891',
+        '0892',
+        '0893',
+        '0894',
+        '0895',
+        '0896',
+        '0897',
+        '0898',
+        '0991',
+        '0992',
+        '0993',
+        '0994'
+      ],
     },
   ];
 
-  // Load amounts with their actual denominations
+// Load amounts with their actual denominations
   final List<Map<String, dynamic>> _loadAmounts = [
     {'amount': 10, 'label': '₱10'},
     {'amount': 15, 'label': '₱15'},
@@ -96,7 +213,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     {'amount': 1000, 'label': '₱1000'},
   ];
 
-  // Quick top-up amounts for wallet
+// Quick top-up amounts for wallet
   final List<Map<String, dynamic>> _topUpAmounts = [
     {'amount': 100, 'label': '₱100'},
     {'amount': 300, 'label': '₱300'},
@@ -113,7 +230,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _paymentSuccessController = StreamController<Map<String, dynamic>>.broadcast();
+    _paymentSuccessController =
+    StreamController<Map<String, dynamic>>.broadcast();
     _loadInitialData();
     _setupPaymentListener();
   }
@@ -188,11 +306,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
-  // ============================================
-  // XENDIT API FUNCTIONS (FOR TOP-UP ONLY)
-  // ============================================
+// ============================================
+// XENDIT API FUNCTIONS (FOR TOP-UP ONLY)
+// ============================================
 
-  Future<Map<String, dynamic>> _createXenditInvoiceForTopUp(double amount) async {
+  Future<Map<String, dynamic>> _createXenditInvoiceForTopUp(
+      double amount) async {
     const String url = "https://api.xendit.co/v2/invoices";
 
     String basicAuth = base64Encode(utf8.encode('$_xenditSecretKey:'));
@@ -204,7 +323,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         'Content-Type': 'application/json',
       },
       body: json.encode({
-        'external_id': 'topup_${DateTime.now().millisecondsSinceEpoch}',
+        'external_id': 'topup_${DateTime
+            .now()
+            .millisecondsSinceEpoch}',
         'amount': amount,
         'description': 'Wallet Top-up - ₱${amount.toStringAsFixed(2)}',
         'currency': 'PHP',
@@ -220,7 +341,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     if (response.statusCode == 200 || response.statusCode == 201) {
       return json.decode(response.body);
     } else {
-      throw Exception('Failed to create invoice. Status: ${response.statusCode}');
+      throw Exception(
+          'Failed to create invoice. Status: ${response.statusCode}');
     }
   }
 
@@ -239,9 +361,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
   }
 
-  // ============================================
-  // WALLET TOP-UP FUNCTIONS (USES XENDIT)
-  // ============================================
+// ============================================
+// WALLET TOP-UP FUNCTIONS (USES XENDIT)
+// ============================================
 
   Future<void> _handleTopUp(double amount) async {
     if (amount < 100) {
@@ -272,7 +394,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       });
 
       _startPaymentPolling(invoiceId, amount);
-
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -304,7 +425,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             'amount': amount,
             'type': 'topup',
           });
-
         } else if (status == 'EXPIRED' || status == 'FAILED') {
           timer.cancel();
           if (mounted) {
@@ -315,7 +435,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           }
         }
       } catch (e) {
-        // Continue polling on error
+// Continue polling on error
       }
     });
   }
@@ -326,7 +446,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     double newBalance = _walletBalance + amount;
 
     final newTransaction = {
-      'id': _currentInvoiceId ?? '${DateTime.now().millisecondsSinceEpoch}',
+      'id': _currentInvoiceId ?? '${DateTime
+          .now()
+          .millisecondsSinceEpoch}',
       'title': 'Wallet Top-up',
       'subtitle': 'Xendit',
       'amount': amount,
@@ -345,20 +467,23 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _showSuccessDialog(
       'Top-up Successful!',
-      '₱${amount.toStringAsFixed(2)} has been added to your wallet.\n\nNew Balance: ₱${_walletBalance.toStringAsFixed(2)}',
+      '₱${amount.toStringAsFixed(
+          2)} has been added to your wallet.\n\nNew Balance: ₱${_walletBalance
+          .toStringAsFixed(2)}',
       CupertinoIcons.check_mark_circled,
       CupertinoColors.systemGreen,
     );
   }
 
-  // ============================================
-  // LOAD PURCHASE FUNCTIONS (USES WALLET BALANCE)
-  // ============================================
+// ============================================
+// LOAD PURCHASE FUNCTIONS (USES WALLET BALANCE)
+// ============================================
 
   String? _detectNetwork(String mobileNumber) {
     if (mobileNumber.isEmpty) return null;
 
-    String cleanNumber = mobileNumber.startsWith('0') ? mobileNumber.substring(1) : mobileNumber;
+    String cleanNumber = mobileNumber.startsWith('0') ? mobileNumber.substring(
+        1) : mobileNumber;
     if (cleanNumber.length < 4) return null;
 
     String prefix = cleanNumber.substring(0, 4);
@@ -415,7 +540,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       double newBalance = _walletBalance - amount;
 
       final newTransaction = {
-        'id': 'load_${DateTime.now().millisecondsSinceEpoch}',
+        'id': 'load_${DateTime
+            .now()
+            .millisecondsSinceEpoch}',
         'title': 'Load to $_mobileNumber',
         'subtitle': _selectedNetwork,
         'amount': amount,
@@ -439,16 +566,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
       _showSuccessDialog(
         'Load Sent Successfully!',
-        '₱${amount.toStringAsFixed(2)} has been sent to $_mobileNumber ($_selectedNetwork).\n\nLoad will be credited within 5-10 minutes.\n\nNew Balance: ₱${_walletBalance.toStringAsFixed(2)}',
+        '₱${amount.toStringAsFixed(
+            2)} has been sent to $_mobileNumber ($_selectedNetwork).\n\nLoad will be credited within 5-10 minutes.\n\nNew Balance: ₱${_walletBalance
+            .toStringAsFixed(2)}',
         CupertinoIcons.check_mark_circled,
         CupertinoColors.systemGreen,
       );
     });
   }
 
-  // ============================================
-  // SECURITY FUNCTIONS
-  // ============================================
+// ============================================
+// SECURITY FUNCTIONS
+// ============================================
 
   void _showChangePINDialog() {
     String currentPIN = '';
@@ -458,43 +587,237 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     showCupertinoDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return CupertinoAlertDialog(
-            title: const Text('Change PIN'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 16),
-                  if (!changingPIN)
-                    CupertinoTextField(
-                      obscureText: true,
-                      maxLength: 6,
-                      keyboardType: TextInputType.number,
-                      placeholder: 'Enter current 6-digit PIN',
-                      onChanged: (value) => currentPIN = value,
-                    ),
+      builder: (context) =>
+          StatefulBuilder(
+            builder: (context, setState) {
+              return CupertinoAlertDialog(
+                title: const Text('Change PIN'),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 16),
+                      if (!changingPIN)
+                        CupertinoTextField(
+                          obscureText: true,
+                          maxLength: 6,
+                          keyboardType: TextInputType.number,
+                          placeholder: 'Enter current 6-digit PIN',
+                          onChanged: (value) => currentPIN = value,
+                        ),
 
-                  if (changingPIN) ...[
-                    CupertinoTextField(
-                      obscureText: true,
-                      maxLength: 6,
-                      keyboardType: TextInputType.number,
-                      placeholder: 'Enter new 6-digit PIN',
-                      onChanged: (value) => newPIN = value,
+                      if (changingPIN) ...[
+                        CupertinoTextField(
+                          obscureText: true,
+                          maxLength: 6,
+                          keyboardType: TextInputType.number,
+                          placeholder: 'Enter new 6-digit PIN',
+                          onChanged: (value) => newPIN = value,
+                        ),
+                        const SizedBox(height: 16),
+                        CupertinoTextField(
+                          obscureText: true,
+                          maxLength: 6,
+                          keyboardType: TextInputType.number,
+                          placeholder: 'Confirm new 6-digit PIN',
+                          onChanged: (value) => confirmPIN = value,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                actions: [
+                  CupertinoDialogAction(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  CupertinoDialogAction(
+                    isDefaultAction: true,
+                    onPressed: () {
+                      if (!changingPIN) {
+                        if (currentPIN != _userPIN) {
+                          _showErrorDialog('Incorrect current PIN');
+                          return;
+                        }
+                        setState(() {
+                          changingPIN = true;
+                        });
+                      } else {
+                        if (newPIN.length != 6) {
+                          _showErrorDialog('PIN must be 6 digits');
+                          return;
+                        }
+                        if (newPIN != confirmPIN) {
+                          _showErrorDialog('PINs do not match');
+                          return;
+                        }
+
+                        this.setState(() {
+                          _userPIN = newPIN;
+                        });
+
+                        Navigator.pop(context);
+                        _showSuccessDialog(
+                          'PIN Changed',
+                          'Your PIN has been successfully updated.',
+                          CupertinoIcons.check_mark_circled,
+                          CupertinoColors.systemGreen,
+                        );
+                      }
+                    },
+                    child: Text(changingPIN ? 'Change PIN' : 'Continue'),
+                  ),
+                ],
+              );
+            },
+          ),
+    );
+  }
+
+  void _verifyPINForTransaction(Function() onSuccess) {
+    String enteredPIN = '';
+
+    showCupertinoDialog(
+      context: context,
+      builder: (context) =>
+          CupertinoAlertDialog(
+            title: const Text('Enter PIN'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                const Text('Please enter your 6-digit PIN to continue'),
+                const SizedBox(height: 16),
+                CupertinoTextField(
+                  obscureText: true,
+                  maxLength: 6,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 24, letterSpacing: 10),
+                  onChanged: (value) {
+                    enteredPIN = value;
+                    if (value.length == 6) {
+                      if (value == _userPIN) {
+                        Navigator.pop(context);
+                        onSuccess();
+                      } else {
+                        _showErrorDialog('Incorrect PIN');
+                        Navigator.pop(context);
+                      }
+                    }
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+    );
+  }
+
+// ============================================
+// OTHER FUNCTIONALITIES
+// ============================================
+
+  void _showTransactionHistory() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) =>
+          Container(
+            padding: const EdgeInsets.all(16),
+            height: MediaQuery
+                .of(context)
+                .size
+                .height * 0.8,
+            decoration: BoxDecoration(
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Transaction History',
+                      style: TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 16),
-                    CupertinoTextField(
-                      obscureText: true,
-                      maxLength: 6,
-                      keyboardType: TextInputType.number,
-                      placeholder: 'Confirm new 6-digit PIN',
-                      onChanged: (value) => confirmPIN = value,
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(context),
+                      child: const Icon(CupertinoIcons.xmark),
                     ),
                   ],
-                ],
-              ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: _transactions.isEmpty
+                      ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(CupertinoIcons.doc_text, size: 60,
+                            color: CupertinoColors.systemGrey),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No transactions yet',
+                          style: TextStyle(
+                              color: CupertinoColors.systemGrey, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  )
+                      : ListView.builder(
+                    itemCount: _transactions.length,
+                    itemBuilder: (context, index) {
+                      return _buildTransactionItem(_transactions[index]);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
+  void _showQRCodeScanner() {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) =>
+          CupertinoAlertDialog(
+            title: const Text('Scan QR Code'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 16),
+                Container(
+                  width: 200,
+                  height: 200,
+                  color: CupertinoColors.systemGrey5,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(CupertinoIcons.qrcode, size: 60,
+                            color: CupertinoColors.systemGrey),
+                        const SizedBox(height: 16),
+                        const Text('QR Code Scanner'),
+                        const Text('(Simulated)'),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('Point your camera at a QR code to scan'),
+              ],
             ),
             actions: [
               CupertinoDialogAction(
@@ -504,198 +827,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               CupertinoDialogAction(
                 isDefaultAction: true,
                 onPressed: () {
-                  if (!changingPIN) {
-                    if (currentPIN != _userPIN) {
-                      _showErrorDialog('Incorrect current PIN');
-                      return;
-                    }
-                    setState(() {
-                      changingPIN = true;
-                    });
-                  } else {
-                    if (newPIN.length != 6) {
-                      _showErrorDialog('PIN must be 6 digits');
-                      return;
-                    }
-                    if (newPIN != confirmPIN) {
-                      _showErrorDialog('PINs do not match');
-                      return;
-                    }
-
-                    this.setState(() {
-                      _userPIN = newPIN;
-                    });
-
-                    Navigator.pop(context);
-                    _showSuccessDialog(
-                      'PIN Changed',
-                      'Your PIN has been successfully updated.',
-                      CupertinoIcons.check_mark_circled,
-                      CupertinoColors.systemGreen,
-                    );
-                  }
+                  Navigator.pop(context);
+                  _showSuccessDialog(
+                    'Payment Successful',
+                    'You have successfully paid ₱150.00 to Maria\'s Store.',
+                    CupertinoIcons.check_mark_circled,
+                    CupertinoColors.systemGreen,
+                  );
                 },
-                child: Text(changingPIN ? 'Change PIN' : 'Continue'),
+                child: const Text('Simulate Payment'),
               ),
             ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _verifyPINForTransaction(Function() onSuccess) {
-    String enteredPIN = '';
-
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Enter PIN'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            const Text('Please enter your 6-digit PIN to continue'),
-            const SizedBox(height: 16),
-            CupertinoTextField(
-              obscureText: true,
-              maxLength: 6,
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 24, letterSpacing: 10),
-              onChanged: (value) {
-                enteredPIN = value;
-                if (value.length == 6) {
-                  if (value == _userPIN) {
-                    Navigator.pop(context);
-                    onSuccess();
-                  } else {
-                    _showErrorDialog('Incorrect PIN');
-                    Navigator.pop(context);
-                  }
-                }
-              },
-            ),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
           ),
-        ],
-      ),
-    );
-  }
-
-  // ============================================
-  // OTHER FUNCTIONALITIES
-  // ============================================
-
-  void _showTransactionHistory() {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        height: MediaQuery.of(context).size.height * 0.8,
-        decoration: BoxDecoration(
-          color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Transaction History',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () => Navigator.pop(context),
-                  child: const Icon(CupertinoIcons.xmark),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: _transactions.isEmpty
-                  ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(CupertinoIcons.doc_text, size: 60, color: CupertinoColors.systemGrey),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No transactions yet',
-                      style: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
-                    ),
-                  ],
-                ),
-              )
-                  : ListView.builder(
-                itemCount: _transactions.length,
-                itemBuilder: (context, index) {
-                  return _buildTransactionItem(_transactions[index]);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showQRCodeScanner() {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Scan QR Code'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 16),
-            Container(
-              width: 200,
-              height: 200,
-              color: CupertinoColors.systemGrey5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(CupertinoIcons.qrcode, size: 60, color: CupertinoColors.systemGrey),
-                    const SizedBox(height: 16),
-                    const Text('QR Code Scanner'),
-                    const Text('(Simulated)'),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text('Point your camera at a QR code to scan'),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () {
-              Navigator.pop(context);
-              _showSuccessDialog(
-                'Payment Successful',
-                'You have successfully paid ₱150.00 to Maria\'s Store.',
-                CupertinoIcons.check_mark_circled,
-                CupertinoColors.systemGreen,
-              );
-            },
-            child: const Text('Simulate Payment'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -705,60 +848,267 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     showCupertinoModalPopup(
       context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: BoxDecoration(
-          color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      builder: (context) =>
+          Container(
+            padding: const EdgeInsets.all(16),
+            height: MediaQuery
+                .of(context)
+                .size
+                .height * 0.7,
+            decoration: BoxDecoration(
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12)),
+            ),
+            child: Column(
               children: [
-                const Text(
-                  'Send Money',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Send Money',
+                      style: TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(context),
+                      child: const Icon(CupertinoIcons.xmark),
+                    ),
+                  ],
                 ),
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () => Navigator.pop(context),
-                  child: const Icon(CupertinoIcons.xmark),
+                const SizedBox(height: 16),
+                CupertinoTextField(
+                  controller: recipientController,
+                  placeholder: '09171234567',
+                  prefix: const Padding(
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: Icon(CupertinoIcons.person, size: 20),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                ),
+                const SizedBox(height: 16),
+                CupertinoTextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  placeholder: '₱0.00',
+                  prefix: const Padding(
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: Icon(CupertinoIcons.money_dollar, size: 20),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: CupertinoButton.filled(
+                    onPressed: () {
+                      final recipient = recipientController.text.trim();
+                      final amount = double.tryParse(
+                          amountController.text.trim());
+
+                      if (recipient.isEmpty) {
+                        _showErrorDialog('Please enter recipient number');
+                        return;
+                      }
+
+                      if (amount == null || amount <= 0) {
+                        _showErrorDialog('Please enter a valid amount');
+                        return;
+                      }
+
+                      if (amount > _walletBalance) {
+                        _showInsufficientBalanceDialog(amount);
+                        return;
+                      }
+
+                      Navigator.pop(context);
+                      _verifyPINForTransaction(() {
+                        setState(() {
+                          _walletBalance -= amount;
+                          _transactions.insert(0, {
+                            'id': 'transfer_${DateTime
+                                .now()
+                                .millisecondsSinceEpoch}',
+                            'title': 'Sent to $recipient',
+                            'subtitle': 'Money Transfer',
+                            'amount': amount,
+                            'date': 'Just now',
+                            'type': 'debit',
+                            'status': 'completed',
+                            'service': 'transfer'
+                          });
+                        });
+
+                        _showSuccessDialog(
+                          'Money Sent!',
+                          '₱${amount.toStringAsFixed(
+                              2)} has been sent to $recipient.\n\nNew Balance: ₱${_walletBalance
+                              .toStringAsFixed(2)}',
+                          CupertinoIcons.check_mark_circled,
+                          CupertinoColors.systemGreen,
+                        );
+                      });
+                    },
+                    child: const Text('Send Money'),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            CupertinoTextField(
-              controller: recipientController,
-              placeholder: '09171234567',
-              prefix: const Padding(
-                padding: EdgeInsets.only(left: 8.0),
-                child: Icon(CupertinoIcons.person, size: 20),
-              ),
-              padding: const EdgeInsets.all(12),
+          ),
+    );
+  }
+
+  void _showBillsPaymentScreen() {
+    List<Map<String, dynamic>> billers = [
+      {
+        'name': 'Meralco',
+        'icon': CupertinoIcons.bolt,
+        'color': CupertinoColors.systemBlue
+      },
+      {
+        'name': 'Maynilad',
+        'icon': CupertinoIcons.drop,
+        'color': CupertinoColors.systemBlue
+      },
+      {
+        'name': 'PLDT',
+        'icon': CupertinoIcons.phone,
+        'color': CupertinoColors.systemRed
+      },
+      {
+        'name': 'Converge',
+        'icon': CupertinoIcons.wifi,
+        'color': CupertinoColors.systemOrange
+      },
+    ];
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) =>
+          Container(
+            padding: const EdgeInsets.all(16),
+            height: MediaQuery
+                .of(context)
+                .size
+                .height * 0.7,
+            decoration: BoxDecoration(
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12)),
             ),
-            const SizedBox(height: 16),
-            CupertinoTextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              placeholder: '₱0.00',
-              prefix: const Padding(
-                padding: EdgeInsets.only(left: 8.0),
-                child: Icon(CupertinoIcons.money_dollar, size: 20),
-              ),
-              padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Pay Bills',
+                      style: TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(context),
+                      child: const Icon(CupertinoIcons.xmark),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text('Select a biller to pay:'),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 1.2,
+                    ),
+                    itemCount: billers.length,
+                    itemBuilder: (context, index) {
+                      final biller = billers[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showBillPaymentForm(biller['name']);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _darkModeEnabled ? CupertinoColors
+                                .darkBackgroundGray : CupertinoColors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: CupertinoColors
+                                .systemGrey5),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(biller['icon'], size: 40,
+                                  color: biller['color']),
+                              const SizedBox(height: 8),
+                              Text(biller['name']),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: CupertinoButton.filled(
+          ),
+    );
+  }
+
+  void _showBillPaymentForm(String biller) {
+    TextEditingController accountController = TextEditingController();
+    TextEditingController amountController = TextEditingController();
+
+    showCupertinoDialog(
+      context: context,
+      builder: (context) =>
+          CupertinoAlertDialog(
+            title: Text('Pay $biller Bill'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 16),
+                CupertinoTextField(
+                  controller: accountController,
+                  placeholder: 'Account Number',
+                  padding: const EdgeInsets.all(12),
+                ),
+                const SizedBox(height: 16),
+                CupertinoTextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  placeholder: 'Amount',
+                  prefix: const Padding(
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: Text('₱'),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                ),
+              ],
+            ),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              CupertinoDialogAction(
+                isDefaultAction: true,
                 onPressed: () {
-                  final recipient = recipientController.text.trim();
+                  final account = accountController.text.trim();
                   final amount = double.tryParse(amountController.text.trim());
 
-                  if (recipient.isEmpty) {
-                    _showErrorDialog('Please enter recipient number');
+                  if (account.isEmpty) {
+                    _showErrorDialog('Please enter account number');
                     return;
                   }
 
@@ -777,369 +1127,220 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     setState(() {
                       _walletBalance -= amount;
                       _transactions.insert(0, {
-                        'id': 'transfer_${DateTime.now().millisecondsSinceEpoch}',
-                        'title': 'Sent to $recipient',
-                        'subtitle': 'Money Transfer',
+                        'id': 'bill_${DateTime
+                            .now()
+                            .millisecondsSinceEpoch}',
+                        'title': '$biller Bill Payment',
+                        'subtitle': 'Account: $account',
                         'amount': amount,
                         'date': 'Just now',
                         'type': 'debit',
                         'status': 'completed',
-                        'service': 'transfer'
+                        'service': 'bills'
                       });
                     });
 
                     _showSuccessDialog(
-                      'Money Sent!',
-                      '₱${amount.toStringAsFixed(2)} has been sent to $recipient.\n\nNew Balance: ₱${_walletBalance.toStringAsFixed(2)}',
+                      'Bill Paid!',
+                      'Your $biller bill of ₱${amount.toStringAsFixed(
+                          2)} has been paid.\n\nNew Balance: ₱${_walletBalance
+                          .toStringAsFixed(2)}',
                       CupertinoIcons.check_mark_circled,
                       CupertinoColors.systemGreen,
                     );
                   });
                 },
-                child: const Text('Send Money'),
+                child: const Text('Pay Bill'),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showBillsPaymentScreen() {
-    List<Map<String, dynamic>> billers = [
-      {'name': 'Meralco', 'icon': CupertinoIcons.bolt, 'color': CupertinoColors.systemBlue},
-      {'name': 'Maynilad', 'icon': CupertinoIcons.drop, 'color': CupertinoColors.systemBlue},
-      {'name': 'PLDT', 'icon': CupertinoIcons.phone, 'color': CupertinoColors.systemRed},
-      {'name': 'Converge', 'icon': CupertinoIcons.wifi, 'color': CupertinoColors.systemOrange},
-    ];
-
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: BoxDecoration(
-          color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Pay Bills',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () => Navigator.pop(context),
-                  child: const Icon(CupertinoIcons.xmark),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text('Select a biller to pay:'),
-            const SizedBox(height: 16),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 1.2,
-                ),
-                itemCount: billers.length,
-                itemBuilder: (context, index) {
-                  final biller = billers[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showBillPaymentForm(biller['name']);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: CupertinoColors.systemGrey5),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(biller['icon'], size: 40, color: biller['color']),
-                          const SizedBox(height: 8),
-                          Text(biller['name']),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showBillPaymentForm(String biller) {
-    TextEditingController accountController = TextEditingController();
-    TextEditingController amountController = TextEditingController();
-
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text('Pay $biller Bill'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 16),
-            CupertinoTextField(
-              controller: accountController,
-              placeholder: 'Account Number',
-              padding: const EdgeInsets.all(12),
-            ),
-            const SizedBox(height: 16),
-            CupertinoTextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              placeholder: 'Amount',
-              prefix: const Padding(
-                padding: EdgeInsets.only(left: 8.0),
-                child: Text('₱'),
-              ),
-              padding: const EdgeInsets.all(12),
-            ),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            ],
           ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () {
-              final account = accountController.text.trim();
-              final amount = double.tryParse(amountController.text.trim());
-
-              if (account.isEmpty) {
-                _showErrorDialog('Please enter account number');
-                return;
-              }
-
-              if (amount == null || amount <= 0) {
-                _showErrorDialog('Please enter a valid amount');
-                return;
-              }
-
-              if (amount > _walletBalance) {
-                _showInsufficientBalanceDialog(amount);
-                return;
-              }
-
-              Navigator.pop(context);
-              _verifyPINForTransaction(() {
-                setState(() {
-                  _walletBalance -= amount;
-                  _transactions.insert(0, {
-                    'id': 'bill_${DateTime.now().millisecondsSinceEpoch}',
-                    'title': '$biller Bill Payment',
-                    'subtitle': 'Account: $account',
-                    'amount': amount,
-                    'date': 'Just now',
-                    'type': 'debit',
-                    'status': 'completed',
-                    'service': 'bills'
-                  });
-                });
-
-                _showSuccessDialog(
-                  'Bill Paid!',
-                  'Your $biller bill of ₱${amount.toStringAsFixed(2)} has been paid.\n\nNew Balance: ₱${_walletBalance.toStringAsFixed(2)}',
-                  CupertinoIcons.check_mark_circled,
-                  CupertinoColors.systemGreen,
-                );
-              });
-            },
-            child: const Text('Pay Bill'),
-          ),
-        ],
-      ),
     );
   }
 
   void _logout() {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      builder: (context) =>
+          CupertinoAlertDialog(
+            title: const Text('Logout'),
+            content: const Text('Are you sure you want to logout?'),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                onPressed: () {
+                  Navigator.pop(context);
+                  _showSuccessDialog(
+                    'Logged Out',
+                    'You have been successfully logged out.',
+                    CupertinoIcons.arrow_right_square,
+                    CupertinoColors.systemBlue,
+                  );
+                },
+                child: const Text('Logout'),
+              ),
+            ],
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(context);
-              _showSuccessDialog(
-                'Logged Out',
-                'You have been successfully logged out.',
-                CupertinoIcons.arrow_right_square,
-                CupertinoColors.systemBlue,
-              );
-            },
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
     );
   }
 
-  // ============================================
-  // UI HELPER FUNCTIONS
-  // ============================================
+// ============================================
+// UI HELPER FUNCTIONS
+// ============================================
 
-  void _showSuccessDialog(String title, String message, IconData icon, Color color) {
+  void _showSuccessDialog(String title, String message, IconData icon,
+      Color color) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 30),
-            const SizedBox(width: 10),
-            Text(title),
-          ],
-        ),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) =>
+          CupertinoAlertDialog(
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: color, size: 30),
+                const SizedBox(width: 10),
+                Text(title),
+              ],
+            ),
+            content: Text(message),
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showErrorDialog(String message) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(CupertinoIcons.exclamationmark_circle, color: CupertinoColors.systemRed, size: 30),
-            SizedBox(width: 10),
-            Text('Error'),
-          ],
-        ),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) =>
+          CupertinoAlertDialog(
+            title: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(CupertinoIcons.exclamationmark_circle,
+                    color: CupertinoColors.systemRed, size: 30),
+                SizedBox(width: 10),
+                Text('Error'),
+              ],
+            ),
+            content: Text(message),
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showInsufficientBalanceDialog(double amount) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(CupertinoIcons.exclamationmark_triangle, color: CupertinoColors.systemOrange, size: 30),
-            SizedBox(width: 10),
-            Text('Insufficient Balance'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            const Text('Your wallet balance is insufficient for this purchase.'),
-            const SizedBox(height: 15),
-            Text(
-              'Required: ₱${amount.toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      builder: (context) =>
+          CupertinoAlertDialog(
+            title: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(CupertinoIcons.exclamationmark_triangle,
+                    color: CupertinoColors.systemOrange, size: 30),
+                SizedBox(width: 10),
+                Text('Insufficient Balance'),
+              ],
             ),
-            Text(
-              'Current: ₱${_walletBalance.toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                const Text(
+                    'Your wallet balance is insufficient for this purchase.'),
+                const SizedBox(height: 15),
+                Text(
+                  'Required: ₱${amount.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                Text(
+                  'Current: ₱${_walletBalance.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  'Please top-up your wallet first.',
+                  style: TextStyle(color: CupertinoColors.systemGrey),
+                ),
+              ],
             ),
-            const SizedBox(height: 15),
-            Text(
-              'Please top-up your wallet first.',
-              style: TextStyle(color: CupertinoColors.systemGrey),
-            ),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    _selectedIndex = 2; // Switch to Top-up screen
+                  });
+                },
+                child: const Text('Top-up Now'),
+              ),
+            ],
           ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _selectedIndex = 2; // Switch to Top-up screen
-              });
-            },
-            child: const Text('Top-up Now'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showTimeoutDialog(double amount) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(CupertinoIcons.time, color: CupertinoColors.systemOrange, size: 30),
-            SizedBox(width: 10),
-            Text('Payment Taking Too Long'),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 8),
-            Text('Your payment is still being processed.'),
-            SizedBox(height: 10),
-            Text(
-              'Please check your email or return to the dashboard.',
-              style: TextStyle(fontSize: 12, color: CupertinoColors.systemGrey),
+      builder: (context) =>
+          CupertinoAlertDialog(
+            title: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(CupertinoIcons.time, color: CupertinoColors.systemOrange,
+                    size: 30),
+                SizedBox(width: 10),
+                Text('Payment Taking Too Long'),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _showWebView = false;
-              });
-            },
-            child: const Text('Return to Dashboard'),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 8),
+                Text('Your payment is still being processed.'),
+                SizedBox(height: 10),
+                Text(
+                  'Please check your email or return to the dashboard.',
+                  style: TextStyle(
+                      fontSize: 12, color: CupertinoColors.systemGrey),
+                ),
+              ],
+            ),
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    _showWebView = false;
+                  });
+                },
+                child: const Text('Return to Dashboard'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1167,13 +1368,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     });
   }
 
-  // ============================================
-  // UI WIDGETS
-  // ============================================
+// ============================================
+// UI WIDGETS
+// ============================================
 
   Widget _buildTransactionItem(Map<String, dynamic> transaction) {
     final bool isCredit = transaction['type'] == 'credit';
-    final Color color = isCredit ? CupertinoColors.systemGreen : CupertinoColors.systemRed;
+    final Color color = isCredit ? CupertinoColors.systemGreen : CupertinoColors
+        .systemRed;
     final IconData icon = transaction['service'] == 'load'
         ? CupertinoIcons.device_phone_portrait
         : transaction['service'] == 'transfer'
@@ -1186,7 +1388,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
+        color: _darkModeEnabled
+            ? CupertinoColors.darkBackgroundGray
+            : CupertinoColors.white,
         border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
       ),
       child: CupertinoListTile(
@@ -1194,7 +1398,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 20),
@@ -1203,7 +1407,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           transaction['title'],
           style: TextStyle(
             fontWeight: FontWeight.w500,
-            color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+            color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors
+                .black,
           ),
         ),
         subtitle: Column(
@@ -1212,7 +1417,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             Text(
               transaction['subtitle'] ?? '',
               style: TextStyle(
-                color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                color: _darkModeEnabled
+                    ? CupertinoColors.systemGrey
+                    : CupertinoColors.systemGrey2,
               ),
             ),
             const SizedBox(height: 2),
@@ -1220,7 +1427,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               transaction['date'],
               style: TextStyle(
                 fontSize: 12,
-                color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                color: _darkModeEnabled
+                    ? CupertinoColors.systemGrey
+                    : CupertinoColors.systemGrey2,
               ),
             ),
           ],
@@ -1230,7 +1439,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '${isCredit ? '+₱' : '-₱'}${transaction['amount'].toStringAsFixed(2)}',
+              '${isCredit ? '+₱' : '-₱'}${transaction['amount'].toStringAsFixed(
+                  2)}',
               style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.bold,
@@ -1242,8 +1452,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: transaction['status'] == 'completed'
-                    ? CupertinoColors.systemGreen.withOpacity(0.1)
-                    : CupertinoColors.systemOrange.withOpacity(0.1),
+                    ? CupertinoColors.systemGreen.withValues(alpha: 0.1)
+                    : CupertinoColors.systemOrange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -1263,9 +1473,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Widget _buildBalanceCard() {
+    final size = MediaQuery.of(context).size;
+
     return Container(
       margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(size.width * 0.05),
+      width: double.infinity,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
@@ -1275,7 +1488,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: CupertinoColors.systemPurple.withOpacity(0.3),
+            color: CupertinoColors.systemPurple.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -1285,11 +1498,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         children: [
           Row(
             children: [
-              const Icon(CupertinoIcons.money_dollar_circle, color: CupertinoColors.white, size: 24),
+              const Icon(CupertinoIcons.money_dollar_circle,
+                  color: CupertinoColors.white, size: 24),
               const SizedBox(width: 8),
               const Text(
                 'WALLET BALANCE',
-                style: TextStyle(color: Color(0xB3FFFFFF), fontSize: 12, letterSpacing: 1),
+                style: TextStyle(
+                    color: Color(0xB3FFFFFF), fontSize: 12, letterSpacing: 1),
               ),
               const Spacer(),
               CupertinoButton(
@@ -1299,16 +1514,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     _selectedIndex = 3; // Go to Settings
                   });
                 },
-                child: const Icon(CupertinoIcons.ellipsis_vertical, color: CupertinoColors.white),
+                child: const Icon(CupertinoIcons.ellipsis_vertical,
+                    color: CupertinoColors.white),
               ),
             ],
           ),
           const SizedBox(height: 10),
           Text(
             '₱${_walletBalance.toStringAsFixed(2)}',
-            style: const TextStyle(
+            style: TextStyle(
               color: CupertinoColors.white,
-              fontSize: 42,
+              fontSize: size.width * 0.1,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -1338,165 +1554,197 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget _buildQuickActionButton({required IconData icon, required String label, required VoidCallback onTap}) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: CupertinoColors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: CupertinoColors.white.withOpacity(0.3), width: 1),
+  Widget _buildQuickActionButton(
+      {required IconData icon, required String label, required VoidCallback onTap}) {
+    return Flexible(
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: CupertinoColors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                    color: CupertinoColors.white.withValues(alpha: 0.3), width: 1),
+              ),
+              child: Icon(icon, color: CupertinoColors.white, size: 24),
             ),
-            child: Icon(icon, color: CupertinoColors.white, size: 24),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(color: CupertinoColors.white, fontSize: 12, fontWeight: FontWeight.w500),
-        ),
-      ],
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: CupertinoColors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildHomeScreen() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(bottom: 80),
-      child: Column(
-        children: [
-          _buildBalanceCard(),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Recent Transactions',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
-                  ),
-                ),
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: _showTransactionHistory,
-                  child: const Text(
-                    'View All',
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + 80,
+          top: 16,
+        ),
+        child: Column(
+          children: [
+            _buildBalanceCard(),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Recent Transactions',
                     style: TextStyle(
-                      color: CupertinoColors.activeBlue,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-                border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
-              ),
-              child: _transactions.isEmpty
-                  ? Padding(
-                padding: const EdgeInsets.all(40),
-                child: Column(
-                  children: [
-                    Icon(CupertinoIcons.doc_text, size: 60, color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No transactions yet',
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: _showTransactionHistory,
+                    child: const Text(
+                      'View All',
                       style: TextStyle(
-                        color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
-                        fontSize: 16,
+                        color: CupertinoColors.activeBlue,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Your transactions will appear here',
-                      style: TextStyle(
-                        color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey3,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-                  : Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: _transactions.take(3).map(_buildTransactionItem).toList(),
-                ),
+                  ),
+                ],
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-                border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Quick Services',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: _darkModeEnabled
+                      ? CupertinoColors.darkBackgroundGray
+                      : CupertinoColors.white,
+                  border: Border.all(
+                      color: CupertinoColors.systemGrey5, width: 0.5),
+                ),
+                child: _transactions.isEmpty
+                    ? Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: Column(
+                    children: [
+                      Icon(CupertinoIcons.doc_text, size: 60,
+                          color: _darkModeEnabled
+                              ? CupertinoColors.systemGrey
+                              : CupertinoColors.systemGrey2),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No transactions yet',
+                        style: TextStyle(
+                          color: _darkModeEnabled
+                              ? CupertinoColors.systemGrey
+                              : CupertinoColors.systemGrey2,
+                          fontSize: 16,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildServiceButton(
-                          icon: CupertinoIcons.device_phone_portrait,
-                          label: 'Buy Load',
-                          color: CupertinoColors.systemPurple,
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = 1; // Go to Buy Load screen
-                            });
-                          },
+                      const SizedBox(height: 8),
+                      Text(
+                        'Your transactions will appear here',
+                        style: TextStyle(
+                          color: _darkModeEnabled
+                              ? CupertinoColors.systemGrey
+                              : CupertinoColors.systemGrey3,
+                          fontSize: 12,
                         ),
-                        _buildServiceButton(
-                          icon: CupertinoIcons.money_dollar_circle,
-                          label: 'Top-up',
-                          color: CupertinoColors.systemGreen,
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = 2; // Go to Top-up screen
-                            });
-                          },
-                        ),
-                        _buildServiceButton(
-                          icon: CupertinoIcons.time,
-                          label: 'History',
-                          color: CupertinoColors.systemOrange,
-                          onTap: _showTransactionHistory,
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
+                )
+                    : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: _transactions
+                        .take(3)
+                        .map(_buildTransactionItem)
+                        .toList(),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: _darkModeEnabled
+                      ? CupertinoColors.darkBackgroundGray
+                      : CupertinoColors.white,
+                  border: Border.all(
+                      color: CupertinoColors.systemGrey5, width: 0.5),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Quick Services',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: _darkModeEnabled
+                              ? CupertinoColors.white
+                              : CupertinoColors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildServiceButton(
+                            icon: CupertinoIcons.device_phone_portrait,
+                            label: 'Buy Load',
+                            color: CupertinoColors.systemPurple,
+                            onTap: () {
+                              setState(() {
+                                _selectedIndex = 1; // Go to Buy Load screen
+                              });
+                            },
+                          ),
+                          _buildServiceButton(
+                            icon: CupertinoIcons.money_dollar_circle,
+                            label: 'Top-up',
+                            color: CupertinoColors.systemGreen,
+                            onTap: () {
+                              setState(() {
+                                _selectedIndex = 2; // Go to Top-up screen
+                              });
+                            },
+                          ),
+                          _buildServiceButton(
+                            icon: CupertinoIcons.time,
+                            label: 'History',
+                            color: CupertinoColors.systemOrange,
+                            onTap: _showTransactionHistory,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1515,7 +1763,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
@@ -1535,42 +1783,55 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Widget _buildBuyLoadScreen() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  setState(() {
-                    _selectedIndex = 0; // Go back to home
-                  });
-                },
-                child: const Icon(CupertinoIcons.back, size: 28),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Buy Mobile Load',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).padding.bottom + 80,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+// Header
+            Row(
+              children: [
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    setState(() {
+                      _selectedIndex = 0; // Go back to home
+                    });
+                  },
+                  child: const Icon(CupertinoIcons.back, size: 28),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Buy Mobile Load',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
 
-          // Mobile Number Input
+// Mobile Number Input
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-              border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              border: Border.all(
+                  color: CupertinoColors.systemGrey5, width: 0.5),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1582,7 +1843,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -1595,23 +1858,28 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         _mobileNumber = value;
                         if (value.length >= 4) {
                           String? detectedNetwork = _detectNetwork(value);
-                          if (detectedNetwork != null && _selectedNetwork.isEmpty) {
+                          if (detectedNetwork != null &&
+                              _selectedNetwork.isEmpty) {
                             _selectedNetwork = detectedNetwork;
                           }
                         }
                       });
                     },
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                     placeholder: '09171234567',
                     prefix: const Padding(
                       padding: EdgeInsets.only(left: 8.0),
-                      child: Icon(CupertinoIcons.phone, size: 20, color: CupertinoColors.systemPurple),
+                      child: Icon(CupertinoIcons.phone, size: 20,
+                          color: CupertinoColors.systemPurple),
                     ),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.systemGrey6,
+                      color: _darkModeEnabled ? CupertinoColors
+                          .darkBackgroundGray : CupertinoColors.systemGrey6,
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -1620,7 +1888,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: _getNetworkColor(_selectedNetwork).withOpacity(0.1),
+                        color: _getNetworkColor(_selectedNetwork).withValues(
+                            alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -1643,7 +1912,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             onPressed: () {
                               showCupertinoModalPopup(
                                 context: context,
-                                builder: (context) => _buildNetworkSelectionSheet(),
+                                builder: (context) =>
+                                    _buildNetworkSelectionSheet(),
                               );
                             },
                             child: const Text(
@@ -1664,14 +1934,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
           const SizedBox(height: 20),
 
-          // Network Selection (if no number entered)
+// Network Selection (if no number entered)
           if (_mobileNumber.isEmpty) ...[
             Text(
               'Select Network',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                color: _darkModeEnabled
+                    ? CupertinoColors.white
+                    : CupertinoColors.black,
               ),
             ),
             const SizedBox(height: 10),
@@ -1695,7 +1967,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       decoration: BoxDecoration(
                         color: _selectedNetwork == network['name']
                             ? network['color'].withOpacity(0.1)
-                            : _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey6,
+                            : _darkModeEnabled
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey6,
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(
                           color: _selectedNetwork == network['name']
@@ -1707,7 +1981,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(network['icon'], color: network['color'], size: 30),
+                          Icon(network['icon'], color: network['color'],
+                              size: 30),
                           const SizedBox(width: 8),
                           Text(
                             network['name'],
@@ -1726,13 +2001,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             const SizedBox(height: 20),
           ],
 
-          // Load Amounts
+// Load Amounts
           Text(
             'Select Amount',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+              color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors
+                  .black,
             ),
           ),
           const SizedBox(height: 10),
@@ -1746,15 +2022,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             children: _loadAmounts.map((item) {
               bool isSelected = _selectedAmount == item['amount'];
               return GestureDetector(
-                onTap: () => setState(() => _selectedAmount = item['amount'].toDouble()),
+                onTap: () =>
+                    setState(() => _selectedAmount = item['amount'].toDouble()),
                 child: Container(
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? CupertinoColors.systemPurple.withOpacity(0.1)
-                        : _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey6,
+                        ? CupertinoColors.systemPurple.withValues(alpha: 0.1)
+                        : _darkModeEnabled
+                        ? CupertinoColors.systemGrey
+                        : CupertinoColors.systemGrey6,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected ? CupertinoColors.systemPurple : const Color(0x00000000),
+                      color: isSelected
+                          ? CupertinoColors.systemPurple
+                          : const Color(0x00000000),
                       width: 2,
                     ),
                   ),
@@ -1768,7 +2049,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           fontWeight: FontWeight.bold,
                           color: isSelected
                               ? CupertinoColors.systemPurple
-                              : _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                              : _darkModeEnabled
+                              ? CupertinoColors.white
+                              : CupertinoColors.black,
                         ),
                       ),
                     ],
@@ -1780,12 +2063,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
           const SizedBox(height: 20),
 
-          // Custom Amount
+// Custom Amount
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-              border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              border: Border.all(
+                  color: CupertinoColors.systemGrey5, width: 0.5),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1797,14 +2083,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     'Enter any amount between ₱10 - ₱1,000',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.systemGrey
+                          : CupertinoColors.systemGrey2,
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -1815,7 +2105,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           controller: _customLoadAmountController,
                           keyboardType: TextInputType.number,
                           style: TextStyle(
-                            color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                            color: _darkModeEnabled
+                                ? CupertinoColors.white
+                                : CupertinoColors.black,
                           ),
                           onChanged: (value) {
                             if (value.isNotEmpty) {
@@ -1827,11 +2119,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           placeholder: 'Enter amount',
                           prefix: const Padding(
                             padding: EdgeInsets.only(left: 8.0),
-                            child: Icon(CupertinoIcons.money_dollar, size: 20, color: CupertinoColors.systemPurple),
+                            child: Icon(CupertinoIcons.money_dollar, size: 20,
+                                color: CupertinoColors.systemPurple),
                           ),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.systemGrey6,
+                            color: _darkModeEnabled ? CupertinoColors
+                                .darkBackgroundGray : CupertinoColors
+                                .systemGrey6,
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
@@ -1843,7 +2138,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             _buyLoad(_selectedAmount);
                           }
                         },
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -1860,76 +2156,94 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
           ),
 
-          // Buy Button
-          if (_selectedAmount > 0 && _mobileNumber.isNotEmpty && _selectedNetwork.isNotEmpty)
+// Buy Button
+          if (_selectedAmount > 0 && _mobileNumber.isNotEmpty &&
+              _selectedNetwork.isNotEmpty)
             Container(
               margin: const EdgeInsets.only(top: 20),
               width: double.infinity,
               child: CupertinoButton.filled(
                 onPressed: _isLoading ? null : () => _buyLoad(_selectedAmount),
                 child: _isLoading
-                    ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                    ? const CupertinoActivityIndicator(
+                    color: CupertinoColors.white)
                     : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(CupertinoIcons.device_phone_portrait, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      'Buy ₱${_selectedAmount.toStringAsFixed(2)} Load to $_mobileNumber',
+                      'Buy ₱${_selectedAmount.toStringAsFixed(
+                          2)} Load to $_mobileNumber',
                       style: const TextStyle(fontSize: 16),
                     ),
                   ],
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildTopUpScreen() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  setState(() {
-                    _selectedIndex = 0; // Go back to home
-                  });
-                },
-                child: const Icon(CupertinoIcons.back, size: 28),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Top-up Wallet',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).padding.bottom + 80,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+// Header
+            Row(
+              children: [
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    setState(() {
+                      _selectedIndex = 0; // Go back to home
+                    });
+                  },
+                  child: const Icon(CupertinoIcons.back, size: 28),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Top-up Wallet',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
 
-          // Balance Info
+// Balance Info
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-              border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              border: Border.all(
+                  color: CupertinoColors.systemGrey5, width: 0.5),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const Icon(CupertinoIcons.money_dollar_circle, size: 40, color: CupertinoColors.systemPurple),
+                  const Icon(CupertinoIcons.money_dollar_circle, size: 40,
+                      color: CupertinoColors.systemPurple),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -1938,7 +2252,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         Text(
                           'Current Balance',
                           style: TextStyle(
-                            color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                            color: _darkModeEnabled
+                                ? CupertinoColors.systemGrey
+                                : CupertinoColors.systemGrey2,
                           ),
                         ),
                         Text(
@@ -1959,12 +2275,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
           const SizedBox(height: 20),
 
-          // Quick Top-up
+// Quick Top-up
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-              border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              border: Border.all(
+                  color: CupertinoColors.systemGrey5, width: 0.5),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1976,14 +2295,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     'Select an amount to add to your wallet',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.systemGrey
+                          : CupertinoColors.systemGrey2,
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -1992,8 +2315,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     runSpacing: 10,
                     children: _topUpAmounts.map((item) {
                       return CupertinoButton.filled(
-                        onPressed: () => _handleTopUp(item['amount'].toDouble()),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        onPressed: () =>
+                            _handleTopUp(item['amount'].toDouble()),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
                         child: Text(
                           item['label'],
                           style: const TextStyle(fontSize: 14),
@@ -2008,12 +2333,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
           const SizedBox(height: 20),
 
-          // Custom Amount
+// Custom Amount
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-              border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              border: Border.all(
+                  color: CupertinoColors.systemGrey5, width: 0.5),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -2025,14 +2353,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     'Enter any amount between ₱100 - ₱50,000',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.systemGrey
+                          : CupertinoColors.systemGrey2,
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -2043,16 +2375,21 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           controller: _customTopUpAmountController,
                           keyboardType: TextInputType.number,
                           style: TextStyle(
-                            color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                            color: _darkModeEnabled
+                                ? CupertinoColors.white
+                                : CupertinoColors.black,
                           ),
                           placeholder: 'Enter amount',
                           prefix: const Padding(
                             padding: EdgeInsets.only(left: 8.0),
-                            child: Icon(CupertinoIcons.money_dollar, size: 20, color: CupertinoColors.systemPurple),
+                            child: Icon(CupertinoIcons.money_dollar, size: 20,
+                                color: CupertinoColors.systemPurple),
                           ),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.systemGrey6,
+                            color: _darkModeEnabled ? CupertinoColors
+                                .darkBackgroundGray : CupertinoColors
+                                .systemGrey6,
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
@@ -2072,7 +2409,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           }
                           _handleTopUp(amount);
                         },
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 12),
                         child: const Text('Top-up'),
                       ),
                     ],
@@ -2084,12 +2422,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
           const SizedBox(height: 20),
 
-          // Payment Methods
+// Payment Methods
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-              border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              border: Border.all(
+                  color: CupertinoColors.systemGrey5, width: 0.5),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -2101,52 +2442,69 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
                   const SizedBox(height: 10),
                   CupertinoListTile(
-                    leading: const Icon(CupertinoIcons.creditcard, color: CupertinoColors.systemPurple),
+                    leading: const Icon(CupertinoIcons.creditcard,
+                        color: CupertinoColors.systemPurple),
                     title: Text(
                       'Credit/Debit Card',
                       style: TextStyle(
-                        color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                        color: _darkModeEnabled
+                            ? CupertinoColors.white
+                            : CupertinoColors.black,
                       ),
                     ),
                     subtitle: Text(
                       'Visa, Mastercard, JCB',
                       style: TextStyle(
-                        color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                        color: _darkModeEnabled
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey2,
                       ),
                     ),
                   ),
                   CupertinoListTile(
-                    leading: const Icon(CupertinoIcons.building_2_fill, color: CupertinoColors.systemPurple),
+                    leading: const Icon(CupertinoIcons.building_2_fill,
+                        color: CupertinoColors.systemPurple),
                     title: Text(
                       'Bank Transfer',
                       style: TextStyle(
-                        color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                        color: _darkModeEnabled
+                            ? CupertinoColors.white
+                            : CupertinoColors.black,
                       ),
                     ),
                     subtitle: Text(
                       'BDO, BPI, UnionBank, etc.',
                       style: TextStyle(
-                        color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                        color: _darkModeEnabled
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey2,
                       ),
                     ),
                   ),
                   CupertinoListTile(
-                    leading: const Icon(CupertinoIcons.qrcode, color: CupertinoColors.systemPurple),
+                    leading: const Icon(CupertinoIcons.qrcode,
+                        color: CupertinoColors.systemPurple),
                     title: Text(
                       'E-Wallets',
                       style: TextStyle(
-                        color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                        color: _darkModeEnabled
+                            ? CupertinoColors.white
+                            : CupertinoColors.black,
                       ),
                     ),
                     subtitle: Text(
                       'GCash, Maya, GrabPay',
                       style: TextStyle(
-                        color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                        color: _darkModeEnabled
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey2,
                       ),
                     ),
                   ),
@@ -2156,46 +2514,60 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ],
       ),
+    ),
     );
   }
 
   Widget _buildSettingsScreen() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  setState(() {
-                    _selectedIndex = 0; // Go back to home
-                  });
-                },
-                child: const Icon(CupertinoIcons.back, size: 28),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Settings',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).padding.bottom + 80,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+// Header
+            Row(
+              children: [
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    setState(() {
+                      _selectedIndex = 0; // Go back to home
+                    });
+                  },
+                  child: const Icon(CupertinoIcons.back, size: 28),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 30),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
 
-          // User Info Card
+// User Info Card
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-              border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              border: Border.all(
+                  color: CupertinoColors.systemGrey5, width: 0.5),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -2208,7 +2580,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       color: CupertinoColors.systemPurple,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(CupertinoIcons.person, color: CupertinoColors.white, size: 30),
+                    child: const Icon(
+                        CupertinoIcons.person, color: CupertinoColors.white,
+                        size: 30),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -2220,14 +2594,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                            color: _darkModeEnabled
+                                ? CupertinoColors.white
+                                : CupertinoColors.black,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'user@quickpay.com',
                           style: TextStyle(
-                            color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                            color: _darkModeEnabled
+                                ? CupertinoColors.systemGrey
+                                : CupertinoColors.systemGrey2,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -2248,30 +2626,38 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
           const SizedBox(height: 20),
 
-          // Settings Options
+// Settings Options
           Text(
             'Preferences',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+              color: _darkModeEnabled
+                  ? CupertinoColors.systemGrey
+                  : CupertinoColors.systemGrey2,
             ),
           ),
           const SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-              border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              border: Border.all(
+                  color: CupertinoColors.systemGrey5, width: 0.5),
             ),
             child: Column(
               children: [
                 CupertinoListTile(
-                  leading: const Icon(CupertinoIcons.bell, color: CupertinoColors.systemPurple),
+                  leading: const Icon(
+                      CupertinoIcons.bell, color: CupertinoColors.systemPurple),
                   title: Text(
                     'Notifications',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
                   trailing: CupertinoSwitch(
@@ -2282,7 +2668,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       });
                       _showSuccessDialog(
                         'Notifications',
-                        value ? 'Notifications enabled' : 'Notifications disabled',
+                        value
+                            ? 'Notifications enabled'
+                            : 'Notifications disabled',
                         CupertinoIcons.bell,
                         CupertinoColors.systemBlue,
                       );
@@ -2291,11 +2679,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
                 Container(height: 1, color: CupertinoColors.separator),
                 CupertinoListTile(
-                  leading: const Icon(CupertinoIcons.moon, color: CupertinoColors.systemPurple),
+                  leading: const Icon(
+                      CupertinoIcons.moon, color: CupertinoColors.systemPurple),
                   title: Text(
                     'Dark Mode',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
                   trailing: CupertinoSwitch(
@@ -2309,14 +2700,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
                 Container(height: 1, color: CupertinoColors.separator),
                 CupertinoListTile(
-                  leading: const Icon(CupertinoIcons.time, color: CupertinoColors.systemPurple),
+                  leading: const Icon(
+                      CupertinoIcons.time, color: CupertinoColors.systemPurple),
                   title: Text(
                     'Transaction History',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
-                  trailing: const Icon(CupertinoIcons.right_chevron, color: CupertinoColors.systemPurple),
+                  trailing: const Icon(CupertinoIcons.right_chevron,
+                      color: CupertinoColors.systemPurple),
                   onTap: _showTransactionHistory,
                 ),
               ],
@@ -2330,36 +2725,48 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+              color: _darkModeEnabled
+                  ? CupertinoColors.systemGrey
+                  : CupertinoColors.systemGrey2,
             ),
           ),
           const SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-              border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              border: Border.all(
+                  color: CupertinoColors.systemGrey5, width: 0.5),
             ),
             child: Column(
               children: [
                 CupertinoListTile(
-                  leading: const Icon(CupertinoIcons.lock, color: CupertinoColors.systemPurple),
+                  leading: const Icon(
+                      CupertinoIcons.lock, color: CupertinoColors.systemPurple),
                   title: Text(
                     'Change PIN',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
-                  trailing: const Icon(CupertinoIcons.right_chevron, color: CupertinoColors.systemPurple),
+                  trailing: const Icon(CupertinoIcons.right_chevron,
+                      color: CupertinoColors.systemPurple),
                   onTap: _showChangePINDialog,
                 ),
                 Container(height: 1, color: CupertinoColors.separator),
                 CupertinoListTile(
-                  leading: const Icon(CupertinoIcons.hand_raised, color: CupertinoColors.systemPurple),
+                  leading: const Icon(CupertinoIcons.hand_raised,
+                      color: CupertinoColors.systemPurple),
                   title: Text(
                     'Biometric Login',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
                   trailing: CupertinoSwitch(
@@ -2370,7 +2777,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       });
                       _showSuccessDialog(
                         'Biometric Login',
-                        value ? 'Biometric login enabled' : 'Biometric login disabled',
+                        value
+                            ? 'Biometric login enabled'
+                            : 'Biometric login disabled',
                         CupertinoIcons.hand_raised,
                         CupertinoColors.systemBlue,
                       );
@@ -2388,27 +2797,36 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+              color: _darkModeEnabled
+                  ? CupertinoColors.systemGrey
+                  : CupertinoColors.systemGrey2,
             ),
           ),
           const SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
-              border: Border.all(color: CupertinoColors.systemGrey5, width: 0.5),
+              color: _darkModeEnabled
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
+              border: Border.all(
+                  color: CupertinoColors.systemGrey5, width: 0.5),
             ),
             child: Column(
               children: [
                 CupertinoListTile(
-                  leading: const Icon(CupertinoIcons.question_circle, color: CupertinoColors.systemPurple),
+                  leading: const Icon(CupertinoIcons.question_circle,
+                      color: CupertinoColors.systemPurple),
                   title: Text(
                     'Help Center',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
-                  trailing: const Icon(CupertinoIcons.right_chevron, color: CupertinoColors.systemPurple),
+                  trailing: const Icon(CupertinoIcons.right_chevron,
+                      color: CupertinoColors.systemPurple),
                   onTap: () {
                     _showSuccessDialog(
                       'Help Center',
@@ -2420,14 +2838,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
                 Container(height: 1, color: CupertinoColors.separator),
                 CupertinoListTile(
-                  leading: const Icon(CupertinoIcons.chat_bubble_2, color: CupertinoColors.systemPurple),
+                  leading: const Icon(CupertinoIcons.chat_bubble_2,
+                      color: CupertinoColors.systemPurple),
                   title: Text(
                     'Contact Support',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
-                  trailing: const Icon(CupertinoIcons.right_chevron, color: CupertinoColors.systemPurple),
+                  trailing: const Icon(CupertinoIcons.right_chevron,
+                      color: CupertinoColors.systemPurple),
                   onTap: () {
                     _showSuccessDialog(
                       'Contact Support',
@@ -2439,14 +2861,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
                 Container(height: 1, color: CupertinoColors.separator),
                 CupertinoListTile(
-                  leading: const Icon(CupertinoIcons.doc_text, color: CupertinoColors.systemPurple),
+                  leading: const Icon(CupertinoIcons.doc_text,
+                      color: CupertinoColors.systemPurple),
                   title: Text(
                     'Terms & Conditions',
                     style: TextStyle(
-                      color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      color: _darkModeEnabled
+                          ? CupertinoColors.white
+                          : CupertinoColors.black,
                     ),
                   ),
-                  trailing: const Icon(CupertinoIcons.right_chevron, color: CupertinoColors.systemPurple),
+                  trailing: const Icon(CupertinoIcons.right_chevron,
+                      color: CupertinoColors.systemPurple),
                   onTap: () {
                     _showSuccessDialog(
                       'Terms & Conditions',
@@ -2462,7 +2888,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
           const SizedBox(height: 30),
 
-          // Logout Button
+// Logout Button
           SizedBox(
             width: double.infinity,
             child: CupertinoButton(
@@ -2473,6 +2899,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -2481,7 +2908,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-        color: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
+        color: _darkModeEnabled
+            ? CupertinoColors.darkBackgroundGray
+            : CupertinoColors.white,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -2492,14 +2921,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+              color: _darkModeEnabled ? CupertinoColors.white : CupertinoColors
+                  .black,
             ),
           ),
           const SizedBox(height: 10),
           Text(
             'Choose your mobile network',
             style: TextStyle(
-              color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+              color: _darkModeEnabled
+                  ? CupertinoColors.systemGrey
+                  : CupertinoColors.systemGrey2,
             ),
           ),
           const SizedBox(height: 20),
@@ -2520,17 +2952,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   fontWeight: FontWeight.bold,
                   color: _selectedNetwork == network['name']
                       ? network['color']
-                      : _darkModeEnabled ? CupertinoColors.white : CupertinoColors.black,
+                      : _darkModeEnabled
+                      ? CupertinoColors.white
+                      : CupertinoColors.black,
                 ),
               ),
               subtitle: Text(
                 'Prefixes: ${network['prefixes'].take(3).join(', ')}...',
                 style: TextStyle(
-                  color: _darkModeEnabled ? CupertinoColors.systemGrey : CupertinoColors.systemGrey2,
+                  color: _darkModeEnabled
+                      ? CupertinoColors.systemGrey
+                      : CupertinoColors.systemGrey2,
                 ),
               ),
               trailing: _selectedNetwork == network['name']
-                  ? Icon(CupertinoIcons.check_mark_circled, color: network['color'])
+                  ? Icon(
+                  CupertinoIcons.check_mark_circled, color: network['color'])
                   : null,
               onTap: () {
                 Navigator.pop(context);
@@ -2549,33 +2986,37 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Complete Payment'),
-        backgroundColor: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
+        backgroundColor: _darkModeEnabled
+            ? CupertinoColors.darkBackgroundGray
+            : CupertinoColors.white,
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           child: const Icon(CupertinoIcons.back),
           onPressed: () {
             showCupertinoDialog(
               context: context,
-              builder: (context) => CupertinoAlertDialog(
-                title: const Text('Cancel Payment?'),
-                content: const Text('Are you sure you want to cancel this payment?'),
-                actions: [
-                  CupertinoDialogAction(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('No'),
+              builder: (context) =>
+                  CupertinoAlertDialog(
+                    title: const Text('Cancel Payment?'),
+                    content: const Text(
+                        'Are you sure you want to cancel this payment?'),
+                    actions: [
+                      CupertinoDialogAction(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('No'),
+                      ),
+                      CupertinoDialogAction(
+                        isDestructiveAction: true,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          setState(() {
+                            _showWebView = false;
+                          });
+                        },
+                        child: const Text('Yes, Cancel'),
+                      ),
+                    ],
                   ),
-                  CupertinoDialogAction(
-                    isDestructiveAction: true,
-                    onPressed: () {
-                      Navigator.pop(context);
-                      setState(() {
-                        _showWebView = false;
-                      });
-                    },
-                    child: const Text('Yes, Cancel'),
-                  ),
-                ],
-              ),
             );
           },
         ),
@@ -2644,21 +3085,25 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         onTap: _onItemTapped,
         activeColor: CupertinoColors.activeBlue,
         inactiveColor: CupertinoColors.systemGrey,
-        backgroundColor: _darkModeEnabled ? CupertinoColors.darkBackgroundGray : CupertinoColors.white,
+        backgroundColor: _darkModeEnabled
+            ? CupertinoColors.darkBackgroundGray
+            : CupertinoColors.white,
       ),
       tabBuilder: (BuildContext context, int index) {
         return CupertinoPageScaffold(
           navigationBar: _selectedIndex == 0
               ? CupertinoNavigationBar(
             middle: const Text('QuickPay Wallet'),
-            backgroundColor: CupertinoColors.systemBackground.withOpacity(0),
+            backgroundColor: CupertinoColors.systemBackground.withValues(alpha: 0),
             border: null,
             trailing: _isLoading
                 ? const CupertinoActivityIndicator()
                 : null,
           )
               : null,
-          backgroundColor: _darkModeEnabled ? CupertinoColors.black : CupertinoColors.systemGroupedBackground,
+          backgroundColor: _darkModeEnabled
+              ? CupertinoColors.black
+              : CupertinoColors.systemGroupedBackground,
           child: _buildCurrentScreen(),
         );
       },
