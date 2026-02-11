@@ -4,13 +4,22 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:local_auth/local_auth.dart';
 import 'splash_screen.dart';
 
 // Add this at the top level for global dark mode state
 final ValueNotifier<bool> darkModeNotifier = ValueNotifier<bool>(false);
 
-void main() {
-runApp(const WalletApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive
+  await Hive.initFlutter();
+  await Hive.openBox('walletBox');
+  await Hive.openBox('database'); // For auth system
+
+  runApp(const WalletApp());
 }
 
 class WalletApp extends StatelessWidget {
@@ -64,6 +73,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 // ============================================
 final String _xenditSecretKey = "xnd_development_z8cNO5PbZB5MRi7yfFxamY53fHyPp1152XyJsQ96OgwzoArEItoogXXeFKHXJGd";
 
+// Hive and Local Auth
+final Box _walletBox = Hive.box('walletBox');
+final LocalAuthentication _localAuth = LocalAuthentication();
+
 // App State
 double _walletBalance = 1000.00;
 bool _isLoading = false;
@@ -83,6 +96,7 @@ int _selectedIndex = 0;
 
 // Settings states
 bool _notificationsEnabled = true;
+bool _biometricEnabled = false;
 String _userPIN = "123456";
 
 // Mobile network providers
@@ -158,8 +172,33 @@ final TextEditingController _customTopUpAmountController = TextEditingController
 void initState() {
 super.initState();
 _paymentSuccessController = StreamController<Map<String, dynamic>>.broadcast();
+_loadDataFromHive();
 _loadInitialData();
 _setupPaymentListener();
+}
+
+void _loadDataFromHive() {
+  // Load wallet balance from Hive
+  final savedBalance = _walletBox.get('balance');
+  if (savedBalance != null) {
+    _walletBalance = savedBalance is double ? savedBalance : (savedBalance as num).toDouble();
+  }
+
+  // Load biometric setting
+  final savedBiometric = _walletBox.get('biometricEnabled');
+  if (savedBiometric != null) {
+    _biometricEnabled = savedBiometric as bool;
+  }
+
+  // Load notifications setting
+  final savedNotifications = _walletBox.get('notificationsEnabled');
+  if (savedNotifications != null) {
+    _notificationsEnabled = savedNotifications as bool;
+  }
+}
+
+void _saveBalanceToHive() {
+  _walletBox.put('balance', _walletBalance);
 }
 
 void _setupPaymentListener() {
@@ -383,6 +422,7 @@ final newTransaction = {
 
 setState(() {
 _walletBalance = newBalance;
+_saveBalanceToHive();
 _showWebView = false;
 _transactions.insert(0, newTransaction);
 _customTopUpAmountController.clear();
@@ -473,6 +513,7 @@ final newTransaction = {
 
 setState(() {
 _walletBalance = newBalance;
+_saveBalanceToHive();
 _isLoading = false;
 _transactions.insert(0, newTransaction);
 
@@ -496,45 +537,71 @@ CupertinoColors.systemGreen,
 // SECURITY FUNCTIONS
 // ============================================
 
-void _verifyPINForTransaction(Function() onSuccess) {
-showCupertinoDialog(
-context: context,
-builder: (context) => CupertinoAlertDialog(
-title: const Text('Enter PIN'),
-content: Column(
-mainAxisSize: MainAxisSize.min,
-children: [
-const Text('Please enter your 6-digit PIN to continue'),
-const SizedBox(height: 16),
-CupertinoTextField(
-obscureText: true,
-maxLength: 6,
-keyboardType: TextInputType.number,
-textAlign: TextAlign.center,
-style: const TextStyle(fontSize: 24, letterSpacing: 10),
-placeholder: '••••••',
-onChanged: (value) {
-if (value.length == 6) {
-if (value == _userPIN) {
-Navigator.pop(context);
-onSuccess();
-} else {
-_showErrorDialog('Incorrect PIN');
-Navigator.pop(context);
-}
-}
-},
-),
-],
-),
-actions: [
-CupertinoDialogAction(
-onPressed: () => Navigator.pop(context),
-child: const Text('Cancel'),
-),
-],
-),
-);
+void _verifyPINForTransaction(Function() onSuccess) async {
+  // If biometric is enabled, try biometric first
+  if (_biometricEnabled) {
+    try {
+      final canCheckBiometrics = await _localAuth.canCheckBiometrics;
+      final isDeviceSupported = await _localAuth.isDeviceSupported();
+
+      if (canCheckBiometrics || isDeviceSupported) {
+        final didAuthenticate = await _localAuth.authenticate(
+          localizedReason: 'Please authenticate to complete this transaction',
+          options: const AuthenticationOptions(
+            biometricOnly: false,
+            stickyAuth: true,
+          ),
+        );
+
+        if (didAuthenticate) {
+          onSuccess();
+          return;
+        }
+      }
+    } catch (e) {
+      // Fall back to PIN if biometric fails
+    }
+  }
+
+  // Show PIN dialog
+  showCupertinoDialog(
+    context: context,
+    builder: (context) => CupertinoAlertDialog(
+      title: const Text('Enter PIN'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Please enter your 6-digit PIN to continue'),
+          const SizedBox(height: 16),
+          CupertinoTextField(
+            obscureText: true,
+            maxLength: 6,
+            keyboardType: TextInputType.number,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 24, letterSpacing: 10),
+            placeholder: '••••••',
+            onChanged: (value) {
+              if (value.length == 6) {
+                if (value == _userPIN) {
+                  Navigator.pop(context);
+                  onSuccess();
+                } else {
+                  _showErrorDialog('Incorrect PIN');
+                  Navigator.pop(context);
+                }
+              }
+            },
+          ),
+        ],
+      ),
+      actions: [
+        CupertinoDialogAction(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+      ],
+    ),
+  );
 }
 
 // ============================================
@@ -698,7 +765,9 @@ child: Icon(CupertinoIcons.xmark, size: 24, color: CupertinoTheme.of(context).te
 ],
 ),
 ),
-Padding(
+Expanded(
+child: SingleChildScrollView(
+child: Padding(
 padding: const EdgeInsets.all(16),
 child: Column(
 children: [
@@ -750,6 +819,7 @@ Navigator.pop(context);
 _verifyPINForTransaction(() {
 setState(() {
 _walletBalance -= amount;
+_saveBalanceToHive();
 _transactions.insert(0, {
 'id': 'transfer_${DateTime.now().millisecondsSinceEpoch}',
 'title': 'Sent to $recipient',
@@ -774,6 +844,8 @@ child: const Text('Send Money'),
 ),
 ),
 ],
+),
+),
 ),
 ),
 ],
@@ -1141,12 +1213,12 @@ borderRadius: BorderRadius.circular(16),
 child: Row(
 children: [
 Container(
-width: 48,
-height: 48,
-decoration: BoxDecoration(
-color: color.withOpacity(0.1),
-borderRadius: BorderRadius.circular(24),
-),
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(24),
+            ),
 child: Icon(icon, color: color, size: 24),
 ),
 const SizedBox(width: 14),
@@ -1192,15 +1264,15 @@ fontWeight: FontWeight.w700,
 fontSize: 17,
 ),
 ),
-const SizedBox(height: 6),
-Container(
-padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-decoration: BoxDecoration(
-color: transaction['status'] == 'completed'
-? CupertinoColors.systemGreen.withOpacity(0.1)
-    : CupertinoColors.systemOrange.withOpacity(0.1),
-borderRadius: BorderRadius.circular(10),
-),
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: transaction['status'] == 'completed'
+                    ? CupertinoColors.systemGreen.withValues(alpha: 0.1)
+                    : CupertinoColors.systemOrange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
 child: Text(
 transaction['status'],
 style: TextStyle(
@@ -1229,13 +1301,13 @@ colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
 begin: Alignment.topLeft,
 end: Alignment.bottomRight,
 ),
-borderRadius: BorderRadius.circular(24),
-boxShadow: [
-BoxShadow(
-color: Color(0xFF6A11CB).withOpacity(0.3),
-blurRadius: 20,
-offset: Offset(0, 10),
-),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xFF6A11CB).withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: Offset(0, 10),
+            ),
 ],
 ),
 child: Column(
@@ -1302,14 +1374,14 @@ padding: EdgeInsets.zero,
 onPressed: onTap,
 child: Column(
 children: [
-Container(
-width: 60,
-height: 60,
-decoration: BoxDecoration(
-color: CupertinoColors.white.withOpacity(0.25),
-borderRadius: BorderRadius.circular(30),
-border: Border.all(color: CupertinoColors.white.withOpacity(0.4), width: 1.5),
-),
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: CupertinoColors.white.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: CupertinoColors.white.withValues(alpha: 0.4), width: 1.5),
+          ),
 child: Icon(icon, color: CupertinoColors.white, size: 28),
 ),
 const SizedBox(height: 10),
@@ -1480,12 +1552,12 @@ padding: EdgeInsets.zero,
 onPressed: onTap,
 child: Column(
 children: [
-Container(
-width: 64,
-height: 64,
-decoration: BoxDecoration(
-color: color.withOpacity(0.1),
-borderRadius: BorderRadius.circular(32),
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(32),
 ),
 child: Icon(icon, color: color, size: 28),
 ),
@@ -1560,7 +1632,7 @@ _selectedNetwork = detectedNetwork;
 }
 });
 },
-placeholder: '09171234567',
+placeholder: '09171234563',
 prefix: const Padding(
 padding: EdgeInsets.only(left: 12),
 child: Icon(CupertinoIcons.phone, size: 20),
@@ -1572,13 +1644,13 @@ borderRadius: BorderRadius.circular(12),
 ),
 ),
 if (_selectedNetwork.isNotEmpty) ...[
-const SizedBox(height: 16),
-Container(
-padding: const EdgeInsets.all(16),
-decoration: BoxDecoration(
-color: _getNetworkColor(_selectedNetwork).withOpacity(0.1),
-borderRadius: BorderRadius.circular(12),
-),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _getNetworkColor(_selectedNetwork).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
 child: Row(
 children: [
 Icon(_getNetworkIcon(_selectedNetwork),
@@ -1619,71 +1691,76 @@ fontWeight: FontWeight.w500,
 ),
 ),
 
-const SizedBox(height: 24),
+const SizedBox(height: 10),
 
-// Network Selection (if no number entered)
-if (_mobileNumber.isEmpty) ...[
-Text(
-'Select Network',
-style: TextStyle(
-fontSize: 18,
-fontWeight: FontWeight.w600,
-color: CupertinoTheme.of(context).textTheme.textStyle.color,
-),
-),
-const SizedBox(height: 12),
-SizedBox(
-height: 110,
-child: ListView.builder(
-scrollDirection: Axis.horizontal,
-itemCount: _mobileNetworks.length,
-itemBuilder: (context, index) {
-final network = _mobileNetworks[index];
-return CupertinoButton(
-padding: EdgeInsets.zero,
-onPressed: () {
-setState(() {
-_selectedNetwork = network['name'];
-});
-},
-child: Container(
-width: 130,
-margin: const EdgeInsets.only(right: 12),
-padding: const EdgeInsets.all(16),
-decoration: BoxDecoration(
-color: _selectedNetwork == network['name']
-? network['color'].withOpacity(0.1)
-    : CupertinoTheme.of(context).scaffoldBackgroundColor,
-borderRadius: BorderRadius.circular(16),
-border: Border.all(
-color: _selectedNetwork == network['name']
-? network['color']
-    : CupertinoColors.systemGrey5,
-width: _selectedNetwork == network['name'] ? 2 : 1,
-),
-),
-child: Column(
-mainAxisAlignment: MainAxisAlignment.center,
-children: [
-Icon(network['icon'], color: network['color'], size: 32),
-const SizedBox(height: 8),
-Text(
-network['name'],
-style: TextStyle(
-color: network['color'],
-fontWeight: FontWeight.w600,
-fontSize: 16,
-),
-),
-],
-),
-),
-);
-},
-),
-),
-const SizedBox(height: 24),
-],
+              // Network Selection (if no number entered)
+              if (_mobileNumber.isEmpty) ...[
+                Text(
+                  'Select Networks',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoTheme.of(context).textTheme.textStyle.color,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Constrained height to prevent overflow
+                SizedBox(
+                  height: 70,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _mobileNetworks.length,
+                    itemBuilder: (context, index) {
+                      final network = _mobileNetworks[index];
+                      final bool isSelected = _selectedNetwork == network['name'];
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedNetwork = network['name'];
+                          });
+                        },
+                        child: Container(
+                          width: 70,
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? network['color'].withValues(alpha: 0.1)
+                                : CupertinoTheme.of(context).scaffoldBackgroundColor,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isSelected
+                                  ? network['color']
+                                  : CupertinoColors.systemGrey5,
+                              width: isSelected ? 2 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(network['icon'], color: network['color'], size: 22),
+                              const SizedBox(height: 3),
+                              Text(
+                                network['name'],
+                                style: TextStyle(
+                                  color: network['color'],
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
 
 // Load Amounts
 Text(
@@ -1707,12 +1784,12 @@ bool isSelected = _selectedAmount == item['amount'];
 return CupertinoButton(
 padding: EdgeInsets.zero,
 onPressed: () => setState(() => _selectedAmount = item['amount'].toDouble()),
-child: Container(
-decoration: BoxDecoration(
-color: isSelected
-? CupertinoColors.systemPurple.withOpacity(0.1)
-    : CupertinoTheme.of(context).scaffoldBackgroundColor,
-borderRadius: BorderRadius.circular(16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? CupertinoColors.systemPurple.withValues(alpha: 0.1)
+                    : CupertinoTheme.of(context).scaffoldBackgroundColor,
+                borderRadius: BorderRadius.circular(16),
 border: Border.all(
 color: isSelected ? CupertinoColors.systemPurple : CupertinoColors.systemGrey5,
 width: isSelected ? 2 : 1,
@@ -2103,6 +2180,7 @@ value: _notificationsEnabled,
 onChanged: (value) {
 setState(() {
 _notificationsEnabled = value;
+_walletBox.put('notificationsEnabled', value);
 });
 _showSuccessDialog(
 'Notifications',
@@ -2110,6 +2188,35 @@ value ? 'Notifications enabled' : 'Notifications disabled',
 CupertinoIcons.bell_fill,
 CupertinoColors.systemBlue,
 );
+},
+),
+),
+_buildSettingsDivider(),
+_buildSettingsItem(
+icon: CupertinoIcons.person_crop_circle,
+title: 'Face ID',
+trailing: CupertinoSwitch(
+value: _biometricEnabled,
+onChanged: (value) async {
+  // Check if biometrics are available
+  final canCheckBiometrics = await _localAuth.canCheckBiometrics;
+  final isDeviceSupported = await _localAuth.isDeviceSupported();
+
+  if (!canCheckBiometrics && !isDeviceSupported) {
+    _showErrorDialog('Biometric authentication is not available on this device');
+    return;
+  }
+
+  setState(() {
+    _biometricEnabled = value;
+    _walletBox.put('biometricEnabled', value);
+  });
+  _showSuccessDialog(
+    'Biometric Authentication',
+    value ? 'Biometric authentication enabled' : 'Biometric authentication disabled',
+    CupertinoIcons.person_alt_circle,
+    CupertinoColors.systemGreen,
+  );
 },
 ),
 ),
@@ -2242,12 +2349,12 @@ color: CupertinoColors.separator,
 
 Widget _buildNetworkSelectionSheet() {
 return Container(
-height: 400,
+height: 100,
 color: CupertinoTheme.of(context).scaffoldBackgroundColor,
 child: Column(
 children: [
 Container(
-padding: const EdgeInsets.all(16),
+padding: const EdgeInsets.all(10),
 decoration: BoxDecoration(
 color: CupertinoTheme.of(context).scaffoldBackgroundColor,
 border: Border(
@@ -2257,7 +2364,7 @@ bottom: BorderSide(color: CupertinoColors.separator),
 child: Text(
 'Select Network',
 style: TextStyle(
-fontSize: 20,
+fontSize: 10,
 fontWeight: FontWeight.w600,
 color: CupertinoTheme.of(context).textTheme.textStyle.color,
 ),
@@ -2274,7 +2381,7 @@ color: CupertinoColors.secondaryLabel,
 ),
 Expanded(
 child: ListView.builder(
-padding: const EdgeInsets.all(8),
+padding: const EdgeInsets.all(5),
 itemCount: _mobileNetworks.length,
 itemBuilder: (context, index) {
 final network = _mobileNetworks[index];
@@ -2286,32 +2393,32 @@ setState(() {
 _selectedNetwork = network['name'];
 });
 },
-child: Container(
-padding: const EdgeInsets.all(12),
-decoration: BoxDecoration(
-color: _selectedNetwork == network['name']
-? network['color'].withOpacity(0.1)
-    : CupertinoTheme.of(context).scaffoldBackgroundColor,
-borderRadius: BorderRadius.circular(12),
-border: Border.all(
-color: _selectedNetwork == network['name']
-? network['color']
-    : CupertinoColors.transparent,
-width: 1,
-),
-),
-child: Row(
-children: [
-Container(
-width: 40,
-height: 40,
-decoration: BoxDecoration(
-color: network['color'].withOpacity(0.1),
-shape: BoxShape.circle,
-),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: _selectedNetwork == network['name']
+                          ? network['color'].withValues(alpha: 0.1)
+                          : CupertinoTheme.of(context).scaffoldBackgroundColor,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _selectedNetwork == network['name']
+                            ? network['color']
+                            : CupertinoColors.transparent,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: network['color'].withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
 child: Icon(network['icon'], color: network['color']),
 ),
-const SizedBox(width: 12),
+const SizedBox(width: 10),
 Expanded(
 child: Column(
 crossAxisAlignment: CrossAxisAlignment.start,

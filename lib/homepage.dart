@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
+import 'auth/login_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -1172,12 +1173,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               CupertinoDialogAction(
                 isDestructiveAction: true,
                 onPressed: () {
-                  Navigator.pop(context);
-                  _showSuccessDialog(
-                    'Logged Out',
-                    'You have been successfully logged out.',
-                    CupertinoIcons.arrow_right_square,
-                    CupertinoColors.systemBlue,
+                  Navigator.pop(context); // Close dialog
+
+                  // Navigate to login page and remove all previous routes
+                  Navigator.of(context).pushAndRemoveUntil(
+                    CupertinoPageRoute(
+                      builder: (context) => const LoginPage(),
+                    ),
+                    (route) => false, // Remove all previous routes
                   );
                 },
                 child: const Text('Logout'),
@@ -2759,10 +2762,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
                 Container(height: 1, color: CupertinoColors.separator),
                 CupertinoListTile(
-                  leading: const Icon(CupertinoIcons.hand_raised,
-                      color: CupertinoColors.systemPurple),
+                  leading: const Icon(CupertinoIcons.person_crop_circle,
+                      color: CupertinoColors.systemBlue),
                   title: Text(
-                    'Biometric Login',
+                    'Face ID',
                     style: TextStyle(
                       color: _darkModeEnabled
                           ? CupertinoColors.white
@@ -2776,11 +2779,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         _biometricEnabled = value;
                       });
                       _showSuccessDialog(
-                        'Biometric Login',
+                        'Biometric Authentication',
                         value
-                            ? 'Biometric login enabled'
-                            : 'Biometric login disabled',
-                        CupertinoIcons.hand_raised,
+                            ? 'Biometric authentication enabled'
+                            : 'Biometric authentication disabled',
+                        CupertinoIcons.person_crop_circle,
                         CupertinoColors.systemBlue,
                       );
                     },

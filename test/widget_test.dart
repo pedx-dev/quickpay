@@ -7,8 +7,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quickpay/main.dart';
-import 'package:quickpay/services/hive_service.dart';
+import 'package:laod/main.dart';
+import 'package:laod/services/hive_service.dart';
 
 void main() {
   setUpAll(() async {
@@ -21,7 +21,7 @@ void main() {
     await tester.pumpWidget(const WalletApp());
     await tester.pumpAndSettle();
 
-    // Verify that the app loads with a balance display
-    expect(find.textContaining('Balance'), findsAtLeastNWidgets(1));
+    // Verify that the app loads with QuickPay text
+    expect(find.text('QuickPay'), findsAtLeastNWidgets(1));
   });
 }

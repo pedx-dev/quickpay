@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'dart:async';
-import 'homepage.dart';
+import 'package:hive/hive.dart';
+import 'auth/login_page.dart';
+import 'auth/signup_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -39,12 +41,23 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _animationController.forward();
 
-    // Navigate to HomePage after 2.5 seconds
-    Timer(const Duration(milliseconds: 2500), () {
+    // Navigate to appropriate page after 2.5 seconds
+    Timer(const Duration(milliseconds: 2500), () async {
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          CupertinoPageRoute(builder: (_) => const HomePage()),
-        );
+        final box = await Hive.openBox('database');
+        final username = box.get("username");
+
+        if (username != null) {
+          // User exists, go to login
+          Navigator.of(context).pushReplacement(
+            CupertinoPageRoute(builder: (_) => const LoginPage()),
+          );
+        } else {
+          // New user, go to signup
+          Navigator.of(context).pushReplacement(
+            CupertinoPageRoute(builder: (_) => const SignupPage()),
+          );
+        }
       }
     });
   }
